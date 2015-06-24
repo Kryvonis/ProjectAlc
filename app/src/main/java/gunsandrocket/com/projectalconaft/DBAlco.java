@@ -1,10 +1,13 @@
 package gunsandrocket.com.projectalconaft;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -14,82 +17,115 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.SQLException;
 
 /**
  * Created by Дмитро on 24.06.2015.
  */
 public class DBAlco extends SQLiteOpenHelper {
-    private static final String LOG_TAG = DBAlco.class.getName();
-    private static final String DB_NAME = "alcoDB.sqllite";
-    private static final String DB_FOLDER = "/data/data/"
-            + "gunsandrocket.com.projectalconaft"+"/databases/";
-    private static final String DB_PATH = DB_FOLDER + DB_NAME;
-    private static final String DB_ASSETS_PATH = "db/" + DB_NAME;
-    private static final int DB_VERSION = 1;
-    private static final int DB_FILES_COPY_BUFFER_SIZE = 8192;
-
+    // путь к базе данных вашего приложения
+    private static String DB_PATH;
+    private static String DB_NAME = "MyDB.sqlite";
+    private SQLiteDatabase myDataBase;
     private final Context mContext;
 
+    /**
+     * Конструктор
+     * Принимает и сохраняет ссылку на переданный контекст для доступа к ресурсам приложения
+     * @param context
+     */
     public DBAlco(Context context) {
-        super(context, DB_NAME, null, DB_VERSION);
-        mContext = context;
+        super(context, DB_NAME, null, 1);
+        this.mContext = context;
+        String packageName = context.getPackageName();
+        DB_PATH = String.format("//data//data//%s//databases//", packageName);
     }
 
-    public  void Initialize() {
-        if (isInitialized() == false) {
-            copyInialDBfromAssets();
-        }
-    }
+    /**
+     * Создает пустую базу данных и перезаписывает ее нашей собственной базой
+     * */
+    public void createDataBase() throws IOException{
+        boolean dbExist = checkDataBase();
 
-    private  boolean isInitialized() {
-
-        SQLiteDatabase checkDB = null;
-        Boolean correctVersion = false;
-
-        try {
-            checkDB = SQLiteDatabase.openDatabase(DB_PATH, null,
-                    SQLiteDatabase.OPEN_READONLY);
-            correctVersion = checkDB.getVersion() == DB_VERSION;
-        } catch (SQLiteException e) {
-            Log.w(LOG_TAG, e.getMessage());
-        } finally {
-            if (checkDB != null)
-                checkDB.close();
-        }
-
-        return checkDB != null && correctVersion;
-    }
-    private  void copyInialDBfromAssets() {
-
-        Context appContext = mContext;
-        InputStream inStream = null;
-        OutputStream outStream = null;
-
-        try {
-            inStream = new BufferedInputStream(appContext.getAssets().open(
-                    DB_ASSETS_PATH), DB_FILES_COPY_BUFFER_SIZE);
-            File dbDir = new File(DB_FOLDER);
-            if (dbDir.exists() == false)
-                dbDir.mkdir();
-            outStream = new BufferedOutputStream(new FileOutputStream(DB_PATH),
-                    DB_FILES_COPY_BUFFER_SIZE);
-
-            byte[] buffer = new byte[DB_FILES_COPY_BUFFER_SIZE];
-            int length;
-            while ((length = inStream.read(buffer)) > 0) {
-                outStream.write(buffer, 0, length);
+        if(dbExist){
+            //ничего не делать - база уже есть
+        }else{
+            //вызывая этот метод создаем пустую базу, позже она будет перезаписана
+            this.getReadableDatabase();
+            try {
+                copyDataBase();
+            } catch (IOException e) {
+                throw new Error("Error copying database");
             }
-
-            outStream.flush();
-            outStream.close();
-            inStream.close();
-
-        } catch (IOException ex) {
-            // Что-то пошло не так
-            Log.e(LOG_TAG, ex.getMessage());
-
         }
     }
+
+    /**
+     * Проверяет, существует ли уже эта база, чтобы не копировать каждый раз при запуске приложения
+     * @return true если существует, false если не существует
+     */
+    private boolean checkDataBase(){
+        SQLiteDatabase checkDB = null;
+
+        try{
+            String myPath = DB_PATH + DB_NAME;
+            checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
+        }catch(SQLiteException e){
+            //база еще не существует
+        }
+        if(checkDB != null){
+            checkDB.close();
+        }
+        return checkDB != null ? true : false;
+    }
+
+    /**
+     * Копирует базу из папки assets заместо созданной локальной БД
+     * Выполняется путем копирования потока байтов.
+     * */
+    private void copyDataBase() throws IOException{
+// Открываем поток для чтения из уже созданной нами БД
+        //источник в assets
+        InputStream externalDbStream = mContext.getAssets().open(DB_NAME);
+
+        // Путь к уже созданной пустой базе в андроиде
+        String outFileName = DB_PATH + DB_NAME;
+
+        // Теперь создадим поток для записи в эту БД побайтно
+        OutputStream localDbStream = new FileOutputStream(outFileName);
+
+        // Собственно, копирование
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = externalDbStream.read(buffer)) > 0) {
+            localDbStream.write(buffer, 0, bytesRead);
+        }
+
+        // Мы будем хорошими мальчиками (девочками) и закроем потоки
+        localDbStream.close();
+
+        externalDbStream.close();
+    }
+
+    public SQLiteDatabase openDataBase() throws SQLException, IOException {
+        String path = DB_PATH + DB_NAME;
+        if (myDataBase == null) {
+            createDataBase();
+            myDataBase = SQLiteDatabase.openDatabase(path, null,
+                    SQLiteDatabase.OPEN_READWRITE);
+        }
+        return myDataBase;
+    }
+
+    @Override
+    public synchronized void close() {
+        if (myDataBase != null) {
+            myDataBase.close();
+        }
+        super.close();
+    }
+
+
     @Override
     public void onCreate(SQLiteDatabase db) {
 
