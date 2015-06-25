@@ -25,7 +25,7 @@ import java.sql.SQLException;
 public class DBAlco extends SQLiteOpenHelper {
     // путь к базе данных вашего приложения
     private static String DB_PATH;
-    private static String DB_NAME = "MyDB.sqlite";
+    private static String DB_NAME = "DBAlco.sqlite";
     private SQLiteDatabase myDataBase;
     private final Context mContext;
 

@@ -32,7 +32,7 @@ public class MainActivity extends ActionBarActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Cursor c = db.query("animals", null, null, null, null, null,null);
+        Cursor c = db.query("alcogols", null, null, null, null, null,null);
 
         List<String> list = new ArrayList<String>();
         if (c.moveToFirst()) {
