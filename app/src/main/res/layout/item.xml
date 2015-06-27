@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="50dp">
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/iv"
+        android:layout_marginTop="5dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/tvName"
+        android:textSize="20dp"
+        android:layout_gravity="right"
+        android:layout_alignTop="@+id/iv"
+        android:layout_toRightOf="@+id/iv"
+        android:layout_toEndOf="@+id/iv"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/tvSize"
+        android:textSize="15dp"
+        android:layout_alignBottom="@+id/tvName"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/tvPrice"
+        android:textSize="15dp"
+        android:layout_alignTop="@+id/tvSize"
+        android:layout_toLeftOf="@+id/tvSize"
+        android:layout_toStartOf="@+id/tvSize"
+        android:layout_marginRight="20dp" />
+</RelativeLayout>

@@ -23,6 +23,11 @@ import java.sql.SQLException;
  * Created by ƒмитро on 24.06.2015.
  */
 public class DBAlco extends SQLiteOpenHelper {
+    public final String NAME = "name";
+    public final String TYPE = "type";
+    public final String ICON = "icon";
+    public final String SIZE = "size";
+    public final String PRICE = "price";
     // путь к базе данных вашего приложени€
     private static String DB_PATH;
     private static String DB_NAME = "DBAlco.sqlite";
