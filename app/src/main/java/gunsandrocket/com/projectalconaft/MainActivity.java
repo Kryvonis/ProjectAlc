@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -18,36 +19,26 @@ import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
-    private final String  LOG_TAG = "myLog";
+
+    private Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        SQLiteDatabase db = null;
-        DBAlco dbHelper = new DBAlco(this);
-        try {
-            db = dbHelper.openDataBase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Cursor c = db.query("animals", null, null, null, null, null,null);
 
-        List<String> list = new ArrayList<String>();
-        if (c.moveToFirst()) {
-            int nameColIndex = c.getColumnIndex("name");
+        initToolbar();
 
-            do {
-                list.add(c.getString(nameColIndex));
-            } while (c.moveToNext());
-        } else Log.d(LOG_TAG, "0 rows");
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,list);
-        ((ListView)findViewById(R.id.listView)).setAdapter(adapter);
-
-        dbHelper.close();
-
+    }
+    private void initToolbar(){
+        toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.app_name);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                return false;
+            }
+        });
     }
 
 
