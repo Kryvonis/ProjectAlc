@@ -13,7 +13,7 @@ public class InputActivity extends Activity {
 
         //here will two editText and button with beautiful animation)
 
-        //next code must need add into button`s metod OnClick
+        //next code need add into button`s metod OnClick
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
 
